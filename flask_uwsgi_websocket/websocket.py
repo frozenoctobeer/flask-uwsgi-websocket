@@ -18,26 +18,27 @@ class WebSocketClient(object):
         self.timeout   = timeout
         self.id        = str(uuid.uuid1())
         self.connected = True
+        self.ctx = uwsgi.request_context()
 
     def receive(self):
         return self.recv()
 
     def recv(self):
         try:
-            return uwsgi.websocket_recv()
+            return uwsgi.websocket_recv(request_context=self.ctx)
         except IOError:
             return None
 
     def recv_nb(self):
-        return uwsgi.websocket_recv_nb()
+        return uwsgi.websocket_recv_nb(request_context=self.ctx)
 
     def send(self, msg, binary=False):
         if binary:
             return self.send_binary(msg)
-        return uwsgi.websocket_send(msg)
+        return uwsgi.websocket_send(msg, request_context=self.ctx)
 
     def send_binary(self, msg):
-        return uwsgi.websocket_send_binary(msg)
+        return uwsgi.websocket_send_binary(msg, request_context=self.ctx)
 
     def send_from_sharedarea(self, id, pos):
         return uwsgi.websocket_send_from_sharedarea(id, pos)
